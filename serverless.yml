@@ -1,0 +1,25 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: blackmythwukong
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: basic-lambda
+service: my-ts-service # Name of your service
+
+provider:
+  name: aws
+  runtime: nodejs18.x # The runtime for your Lambda function
+  region: us-east-1 # AWS region where the service will be deployed
+  environment:
+    NODE_ENV: production # Example environment variable
+
+functions:
+  hello:
+    handler: src/handler.hello
+    events:
+      - http:
+          path: hello
+          method: get
+          cors: true # Enables CORS for the endpoint
+
+custom:
+  serverless-offline:
+    port: 4000 # If using serverless-offline for local development
