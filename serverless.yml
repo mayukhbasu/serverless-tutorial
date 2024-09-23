@@ -10,10 +10,14 @@ provider:
   region: us-east-1 # AWS region where the service will be deployed
   environment:
     NODE_ENV: production # Example environment variable
+    ENV_VAR1: "value1"
+    ENV_VAR2: "value2"
 
 functions:
   hello:
     handler: src/handler.hello
+    memorySize: 512
+    timeout: 10 # Timeout setting in seconds
     events:
       - http:
           path: hello

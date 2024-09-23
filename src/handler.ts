@@ -3,7 +3,7 @@ exports.hello = async (event: any) => {
     // Your logic here
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: "Hello, world!" }),
+      body: JSON.stringify({ message: process.env.ENV_VAR1 || "Hello, world!" }),
     };
   } catch (error) {
     console.error("Error occurred:", error);
