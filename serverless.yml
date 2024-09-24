@@ -23,7 +23,15 @@ functions:
           path: hello
           method: get
           cors: true # Enables CORS for the endpoint
-
+  api:
+    handler: src/helloWorldApi.api
+    memorySize: 512
+    timeout: 10 # Timeout setting in seconds
+    events:
+      - http:
+          path: api
+          method: get
+          cors: true # Enables CORS for the endpoint
 custom:
   serverless-offline:
     port: 4000 # If using serverless-offline for local development
