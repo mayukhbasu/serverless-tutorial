@@ -1,0 +1,409 @@
+{
+  "service": {
+    "service": "lambda-layer-ts-example",
+    "serviceObject": {
+      "name": "lambda-layer-ts-example"
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "nodejs18.x",
+      "region": "us-east-1",
+      "stage": "dev",
+      "versionFunctions": true,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "FetchDataLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/lambda-layer-ts-example-dev-fetchData"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "lambda-layer-ts-example",
+                        "dev",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup",
+                          "logs:TagResource"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/lambda-layer-ts-example-dev*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/lambda-layer-ts-example-dev*:*:*"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "lambda-layer-ts-example",
+                    "dev",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "CustomLayerLambdaLayer": {
+            "Type": "AWS::Lambda::LayerVersion",
+            "Properties": {
+              "Content": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-65454865-84be",
+                "S3Key": "serverless/lambda-layer-ts-example/dev/1727339214641-2024-09-26T08:26:54.641Z/customLayer.zip"
+              },
+              "LayerName": "customLayer",
+              "CompatibleRuntimes": [
+                "nodejs18.x"
+              ]
+            }
+          },
+          "FetchDataLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-65454865-84be",
+                "S3Key": "serverless/lambda-layer-ts-example/dev/1727339214641-2024-09-26T08:26:54.641Z/lambda-layer-ts-example.zip"
+              },
+              "Handler": "src/handler.handler",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "lambda-layer-ts-example-dev-fetchData",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "NODE_OPTIONS": "--enable-source-maps"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "Layers": [
+                {
+                  "Ref": "CustomLayerLambdaLayer"
+                }
+              ]
+            },
+            "DependsOn": [
+              "FetchDataLogGroup"
+            ]
+          },
+          "FetchDataLambdaVersionevctelF8NbNRpQUz1LF9bKCIJWEaBdAaE7Lysheoqo": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "FetchDataLambdaFunction"
+              },
+              "CodeSha256": "3WXqLlvWThsn7CZpoxKJmaYhPs6cDPIUgKOv0fSF5o0="
+            }
+          },
+          "ApiGatewayRestApi": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+              "Name": "dev-lambda-layer-ts-example",
+              "EndpointConfiguration": {
+                "Types": [
+                  "EDGE"
+                ]
+              },
+              "Policy": ""
+            }
+          },
+          "ApiGatewayResourceGetDashdata": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "get-data",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodGetDashdataGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "GET",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceGetDashdata"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "FetchDataLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "FetchDataLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayDeployment1727339208837": {
+            "Type": "AWS::ApiGateway::Deployment",
+            "Properties": {
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "StageName": "dev"
+            },
+            "DependsOn": [
+              "ApiGatewayMethodGetDashdataGet"
+            ]
+          },
+          "FetchDataLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "FetchDataLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "serverless-framework-deployments-us-east-1-65454865-84be",
+            "Export": {
+              "Name": "sls-lambda-layer-ts-example-dev-ServerlessDeploymentBucketName"
+            }
+          },
+          "CustomLayerLambdaLayerQualifiedArn": {
+            "Description": "Current Lambda layer version",
+            "Value": {
+              "Ref": "CustomLayerLambdaLayer"
+            },
+            "Export": {
+              "Name": "sls-lambda-layer-ts-example-dev-CustomLayerLambdaLayerQualifiedArn"
+            }
+          },
+          "CustomLayerLambdaLayerHash": {
+            "Description": "Current Lambda layer hash",
+            "Value": "ad0c7972413702ff40a9d1f8c4fbbe643e06a678",
+            "Export": {
+              "Name": "sls-lambda-layer-ts-example-dev-CustomLayerLambdaLayerHash"
+            }
+          },
+          "CustomLayerLambdaLayerS3Key": {
+            "Description": "Current Lambda layer S3Key",
+            "Value": "serverless/lambda-layer-ts-example/dev/1727339214641-2024-09-26T08:26:54.641Z/customLayer.zip",
+            "Export": {
+              "Name": "sls-lambda-layer-ts-example-dev-CustomLayerLambdaLayerS3Key"
+            }
+          },
+          "FetchDataLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "FetchDataLambdaVersionevctelF8NbNRpQUz1LF9bKCIJWEaBdAaE7Lysheoqo"
+            },
+            "Export": {
+              "Name": "sls-lambda-layer-ts-example-dev-FetchDataLambdaFunctionQualifiedArn"
+            }
+          },
+          "ServiceEndpoint": {
+            "Description": "URL of the service endpoint",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Ref": "ApiGatewayRestApi"
+                  },
+                  ".execute-api.",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ".",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  },
+                  "/dev"
+                ]
+              ]
+            },
+            "Export": {
+              "Name": "sls-lambda-layer-ts-example-dev-ServiceEndpoint"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "pluginsData": {},
+    "functions": {
+      "fetchData": {
+        "handler": "src/handler.handler",
+        "layers": {
+          "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"FetchDataLambdaFunction\"][\"Properties\"][\"Layers\"]"
+        },
+        "events": [
+          {
+            "http": {
+              "path": "get-data",
+              "method": "get",
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "lambda-layer-ts-example-dev-fetchData",
+        "environment": {
+          "NODE_OPTIONS": "--enable-source-maps"
+        },
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "FetchDataLambdaVersionevctelF8NbNRpQUz1LF9bKCIJWEaBdAaE7Lysheoqo"
+      }
+    },
+    "configValidationMode": "warn",
+    "serviceFilename": "serverless.yaml",
+    "initialServerlessConfig": {
+      "service": "lambda-layer-ts-example",
+      "provider": {
+        "$ref": "$[\"service\"][\"provider\"]"
+      },
+      "layers": {
+        "customLayer": {
+          "path": "layer",
+          "compatibleRuntimes": {
+            "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"CustomLayerLambdaLayer\"][\"Properties\"][\"CompatibleRuntimes\"]"
+          },
+          "package": {
+            "artifact": "/Users/bubul/Desktop/Coding/serverless-framework/.serverless/customLayer.zip"
+          }
+        }
+      },
+      "functions": {
+        "$ref": "$[\"service\"][\"functions\"]"
+      }
+    },
+    "appId": null,
+    "orgId": null,
+    "layers": {
+      "$ref": "$[\"service\"][\"initialServerlessConfig\"][\"layers\"]"
+    }
+  },
+  "package": {
+    "artifactDirectoryName": "serverless/lambda-layer-ts-example/dev/1727339214641-2024-09-26T08:26:54.641Z",
+    "artifact": "lambda-layer-ts-example.zip"
+  }
+}

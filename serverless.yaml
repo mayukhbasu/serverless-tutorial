@@ -1,0 +1,22 @@
+service: lambda-layer-ts-example
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+
+layers:
+  customLayer:
+    path: layer
+    compatibleRuntimes:
+      - nodejs18.x
+
+functions:
+  fetchData:
+    handler: src/handler.handler
+    layers:
+      - { Ref: CustomLayerLambdaLayer }
+    events:
+      - http:
+          path: get-data
+          method: get
