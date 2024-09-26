@@ -6,32 +6,16 @@ service: my-ts-service # Name of your service
 
 provider:
   name: aws
-  runtime: nodejs18.x # The runtime for your Lambda function
-  region: us-east-1 # AWS region where the service will be deployed
+  runtime: nodejs18.x
+  region: us-east-1 # Adjust this to your preferred region
   environment:
-    NODE_ENV: production # Example environment variable
-    ENV_VAR1: "value1"
-    ENV_VAR2: "value2"
+    DYNAMODB_TABLE_NAME: "Test_DynamoDB"
 
 functions:
-  hello:
-    handler: src/handler.hello
-    memorySize: 512
-    timeout: 10 # Timeout setting in seconds
+  fetchItems:
+    handler: src/index.handler
+    provisionedConcurrency: 2  # Set the desired number of provisioned concurrency instances
     events:
       - http:
-          path: hello
+          path: items
           method: get
-          cors: true # Enables CORS for the endpoint
-  api:
-    handler: src/helloWorldApi.api
-    memorySize: 512
-    timeout: 10 # Timeout setting in seconds
-    events:
-      - http:
-          path: api
-          method: get
-          cors: true # Enables CORS for the endpoint
-custom:
-  serverless-offline:
-    port: 4000 # If using serverless-offline for local development
